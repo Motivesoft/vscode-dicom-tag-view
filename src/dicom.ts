@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as dicomParser from 'dicom-parser';
 
 export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorProvider {
     public static register(context: vscode.ExtensionContext): vscode.Disposable {
@@ -37,14 +38,23 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
         webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, dicomContent);
     }
 
-    private async getDocumentContent(uri: vscode.Uri): Promise<string> {
+    private async getDocumentContent(uri: vscode.Uri): Promise<dicomParser.DataSet> {
         const content = await vscode.workspace.fs.readFile(uri);
-        return content.toString();
+        return dicomParser.parseDicom( content );
     }
 
-    private getHtmlForWebview(webview: vscode.Webview, dicomContent: string): string {
+    private getHtmlForWebview(webview: vscode.Webview, dicomContent: dicomParser.DataSet): string {
         const nonce = this.getNonce();
-        const formattedDicom = JSON.stringify(JSON.parse(dicomContent), null, 2);
+
+        let formattedDicom = "";
+        const elements = dicomContent.elements;
+        for (let tag in elements) {
+          const element = elements[tag];
+          const vr = element.vr;
+          const value = dicomParser.explicitElementToString(dicomContent,element);
+          formattedDicom += `<br>${tag} : ${vr} : ${value}`;
+        }
+      
 
         return `
             <!DOCTYPE html>

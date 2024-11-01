@@ -52,9 +52,16 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
           const element = elements[tag];
           const vr = element.vr;
           const value = dicomParser.explicitElementToString(dicomContent,element);
-          formattedDicom += `<br>${tag} : ${vr} : ${value}`;
+
+          let escapedValue: string;
+          if (typeof value === 'undefined') {
+            escapedValue = "[undefined]";
+          } else {
+            escapedValue = this.escapeHtml(value);
+          }
+
+          formattedDicom += `<br>${tag} : ${vr} : ${escapedValue}`;
         }
-      
 
         return `
             <!DOCTYPE html>
@@ -78,8 +85,8 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
                 </style>
             </head>
             <body>
-                <h1>JSON Viewer (Read-only)</h1>
-                <pre><code>${this.escapeHtml(formattedDicom)}</code></pre>
+                <h1>DICOM Tag Viewer (Read-only)</h1>
+                <pre><code>${formattedDicom}</code></pre>
             </body>
             </html>
         `;

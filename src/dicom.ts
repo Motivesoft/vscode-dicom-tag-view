@@ -44,7 +44,7 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
     }
 
     // Print each tag as a <LI> and then call recursively for sequences by embedding a <UL>
-    private getHtmlForDataSet(dataSet: dicomParser.DataSet): string {
+    private getHtmlForDataSet(dataSet: dicomParser.DataSet, indent : string = ""): string {
         let formattedDicom = "";
         const elements = dataSet.elements;
 
@@ -61,26 +61,25 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
             const vr = element.vr;
             const value = dicomParser.explicitElementToString(dataSet, element);
 
-            formattedDicom += `<li>${this.formatTag(tag)} : ${vr} : `;
+            formattedDicom += `${indent}${this.formatTag(tag)} : ${vr} : `;
             if (typeof value === 'undefined') {
                 if (vr === "SQ") {
-                    formattedDicom += `[sequence, item count = ${element.items?.length}]`;
+                    formattedDicom += `[sequence, item count = ${element.items?.length}]\n`;
                     if (element.items) {
                         let index = 0;
                         element.items.forEach(item => {
                             if (item.dataSet) {
-                                formattedDicom += `<ul>Item #${index}<ul>${this.getHtmlForDataSet(item.dataSet)}</ul></ul>`;
+                                formattedDicom += `${indent}  Item #${index}\n${this.getHtmlForDataSet(item.dataSet, indent+"    ")}`;
                             }
                             index++;
                         });
                     }
                 } else {
-                    formattedDicom += `[undefined]`;
+                    formattedDicom += `[undefined]\n`;
                 }
             } else {
-                formattedDicom += `${this.escapeHtml(value)}`;
+                formattedDicom += `${this.escapeHtml(value)}\n`;
             }
-            formattedDicom += `</li>`;
         }
 
         return formattedDicom;

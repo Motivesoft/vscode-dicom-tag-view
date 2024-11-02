@@ -15,14 +15,14 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
 
     constructor(
         private readonly context: vscode.ExtensionContext
-    ) {}
+    ) { }
 
     async openCustomDocument(
         uri: vscode.Uri,
         openContext: vscode.CustomDocumentOpenContext,
         token: vscode.CancellationToken
     ): Promise<vscode.CustomDocument> {
-        return { uri, dispose: () => {} };
+        return { uri, dispose: () => { } };
     }
 
     async resolveCustomEditor(
@@ -40,46 +40,51 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
 
     private async getDocumentContent(uri: vscode.Uri): Promise<dicomParser.DataSet> {
         const content = await vscode.workspace.fs.readFile(uri);
-        return dicomParser.parseDicom( content );
+        return dicomParser.parseDicom(content);
     }
-    
+
+    // Print each tag as a <LI> and then call recursively for sequences by embedding a <UL>
+    private getHtmlForDataSet(dataSet: dicomParser.DataSet): string {
+        let formattedDicom = "";
+        const elements = dataSet.elements;
+        for (let tag in elements) {
+            const element = elements[tag];
+            const vr = element.vr;
+            const value = dicomParser.explicitElementToString(dataSet, element);
+
+            let escapedValue: string;
+            if (typeof value === 'undefined') {
+                if (vr === "SQ") {
+                    formattedDicom += `<li>${tag} : ${vr} : [sequence, item count = ${element.items?.length}]</li>`;
+                    if (element.items) {
+                        let index = 0;
+                        element.items.forEach(item => {
+                            if (item.dataSet) {
+                                formattedDicom += `<ul>Item #${index}<ul>${this.getHtmlForDataSet(item.dataSet)}</ul></ul>`;
+                            }
+                            index++;
+                        });
+                    }
+                } else {
+                    formattedDicom += `<li>${tag} : ${vr} : [undefined]</li>`;
+                }
+            } else {
+                formattedDicom += `<li>${tag} : ${vr} : ${this.escapeHtml(value)}</li>`;
+            }
+        }
+
+        return formattedDicom;
+    }
+
     private getHtmlForWebview(webview: vscode.Webview, dicomContent: dicomParser.DataSet): string {
         const nonce = this.getNonce();
 
-/* 
-        let output : string[] = [];
-        dumpDataSet(dicomContent.elements, output);
-        const formattedDicom = output.join('');
- */ 
-        let formattedDicom = "";
-        const elements = dicomContent.elements;
-        for (let tag in elements) {
-          const element = elements[tag];
-          const vr = element.vr;
-          const value = dicomParser.explicitElementToString(dicomContent,element);
-
-          let escapedValue: string;
-          if (typeof value === 'undefined') {
-            if (vr === "SQ" ) {
-                escapedValue = "[sequence]";
-                if( element.items ) {
-                    element.items.forEach( item => {
-                        //formattedDicom+=`<br>&nbsp;&nbsp;&nbsp;&nbsp;${item.tag} : ${item.vr} : ${dicomParser.explicitElementToString(dicomContent,item)}`;
-                        //formattedDicom+=`<br>&nbsp;&nbsp;&nbsp;&nbsp;${item.tag} : ${item.vr}`;
-                        if( item.dataSet ) {
-                            formattedDicom += this.getHtmlForWebview(webview, item.dataSet);
-                        }
-                    });
-                }
-            } else {
-                escapedValue = "[undefined]";
-            }
-          } else {
-            escapedValue = this.escapeHtml(value);
-          }
-
-          formattedDicom += `<br>${tag} : ${vr} : ${escapedValue}`;
-        }
+        /* 
+                let output : string[] = [];
+                dumpDataSet(dicomContent.elements, output);
+                const formattedDicom = output.join('');
+         */
+        let formattedDicom = `<ul>${this.getHtmlForDataSet(dicomContent)}</ul>`;
 
         return `
             <!DOCTYPE html>
@@ -94,7 +99,7 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
                         padding: 10px;
                     }
                     pre {
-                        background-color: #f4f4f4;
+                        <!--background-color: #f4f4f4;-->
                         padding: 10px;
                         border-radius: 5px;
                         white-space: pre-wrap;

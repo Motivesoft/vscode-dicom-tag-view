@@ -11,7 +11,7 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
         return providerRegistration;
     }
 
-    private static readonly viewType = 'vscode-dicom-tag-view.tagViewer';
+    public static readonly viewType = 'vscode-dicom-tag-view.tagViewer';
 
     constructor(
         private readonly context: vscode.ExtensionContext

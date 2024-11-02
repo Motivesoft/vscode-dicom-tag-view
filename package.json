@@ -1,8 +1,8 @@
 {
   "name": "vscode-dicom-tag-view",
   "displayName": "DICOM Tag Viewer",
-  "description": "Open a DICOM file and display its tags in an editor window",
-  "version": "0.0.1",
+  "description": "Open a DICOM file and display its tags in an readonly editor window",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-dicom-tag-view.openTagViewer",
-        "title": "Open DICOM Tag Viewer"
+        "command": "vscode-dicom-tag-view.openInTagViewer",
+        "title": "Open In DICOM Tag Viewer"
       }
     ],
     "customEditors": [
@@ -31,6 +31,29 @@
           }
         ],
         "priority": "option"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "vscode-dicom-tag-view.openInTagViewer",
+          "group": "navigation",
+          "when": "resourceLangId == dicom"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "vscode-dicom-tag-view.openInTagViewer",
+          "group": "navigation",
+          "when": "resourceLangId == dicom"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "dicom",
+        "aliases": ["DICOM", "DCM"],
+        "extensions": [".dcm"]
       }
     ]
   },

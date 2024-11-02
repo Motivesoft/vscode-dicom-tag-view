@@ -35,7 +35,7 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
         };
 
         const dicomContent = await this.getDocumentContent(document.uri);
-        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, dicomContent);
+        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, document.uri, dicomContent);
     }
 
     private async getDocumentContent(uri: vscode.Uri): Promise<dicomParser.DataSet> {
@@ -85,15 +85,14 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
         return formattedDicom;
     }
 
-    private getHtmlForWebview(webview: vscode.Webview, dicomContent: dicomParser.DataSet): string {
+    private getHtmlForWebview(webview: vscode.Webview, documentUri : vscode.Uri, dicomContent: dicomParser.DataSet): string {
         const nonce = this.getNonce();
 
-        /* 
-                let output : string[] = [];
-                dumpDataSet(dicomContent.elements, output);
-                const formattedDicom = output.join('');
-         */
         let formattedDicom = `<ul>${this.getHtmlForDataSet(dicomContent)}</ul>`;
+
+        const path = documentUri.path;
+        const segments = path.split('/');
+        const filename = segments[segments.length - 1];
 
         return `
             <!DOCTYPE html>
@@ -117,7 +116,7 @@ export class DicomReadonlyEditorProvider implements vscode.CustomReadonlyEditorP
                 </style>
             </head>
             <body>
-                <h1>DICOM Tag Viewer (Read-only)</h1>
+                <h1>${filename}</h1>
                 <pre><code>${formattedDicom}</code></pre>
             </body>
             </html>

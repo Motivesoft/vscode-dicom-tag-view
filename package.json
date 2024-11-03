@@ -3,6 +3,26 @@
   "displayName": "DICOM Tag Viewer",
   "description": "Open a DICOM file and display its tags in an readonly editor window",
   "version": "0.1.0",
+  "keywords": [
+    "DICOM",
+    "tag",
+    "viewer"
+  ],
+  "icon": "images/icon.png",
+  "license": "MIT",
+  "publisher": "Motivesoft",
+  "author": {
+    "name": "ianabrown",
+    "url": "https://github.com/ianabrown"
+  },
+  "homepage": "https://github.com/Motivesoft/vscode-dicom-tag-view/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Motivesoft/vscode-dicom-tag-view.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Motivesoft/vscode-dicom-tag-view/issues"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -21,7 +41,7 @@
     "customEditors": [
       {
         "viewType": "vscode-dicom-tag-view.tagViewer",
-        "displayName": "Tag Viewer",
+        "displayName": "DICOM Tag Viewer",
         "selector": [
           {
             "filenamePattern": "*.dcm"

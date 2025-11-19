@@ -2,7 +2,7 @@
   "name": "vscode-dicom-tag-view",
   "displayName": "DICOM Tag Viewer",
   "description": "Open a DICOM file and display its tags in an readonly editor window",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "keywords": [
     "DICOM",
     "tag",

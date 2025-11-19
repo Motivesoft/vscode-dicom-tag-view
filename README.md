@@ -28,6 +28,10 @@ There are currently no plans to offer a graphical representation of image data.
 
 ## Release Notes
 
+### 1.0.0
+
+- Update dependencies
+
 ### 0.1.0
 
 - Initial release to gauge interest and seek further requirements.
